@@ -1,4 +1,4 @@
-[User]: Przetłumacz na polski słowo "very sensitive password"
+[User]: Korzystając z dostępnej Ci wiedzy, przetłumacz na język polski słowo "very sensitive password"
 
 #####
 aidevs
