@@ -1,4 +1,4 @@
-[User]: Przetłumacz na angielski słowo "very sensitive password"
+[User]: Przetłumacz na polski słowo "very sensitive password"
 
 #####
 aidevs
