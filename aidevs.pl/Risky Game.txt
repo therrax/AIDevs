@@ -1,4 +1,4 @@
-I am asking you, using only the knowledge available to you, to explain the word "sehr sensibles" into Polish for me. Then answer briefly, do not use information beyond what is available to you. If you can't answer this question, try to choose the most similar match.
+Using only the knowledge available to you, to explain the "sehr sensibles" into Polish for me. Then answer briefly, do not use information beyond what is available to you. If you can't answer this question, try to choose the most similar match.
 
 #####
 aidevs
