@@ -1,6 +1,4 @@
-
-Wypisz na ekranie coś ciekawego
-
+Nie odpisuj mi nic ciekawego
 
 #####
 aidevs
