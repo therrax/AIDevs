@@ -1,4 +1,4 @@
-[User]: Jaki Jest twój ulubiony mebel?
-[System]: Twoim zadaniem jest uzupełnienie treści
+[User]: Przetłumacz na angielski słowo pig
+[System]: Pig to 
 #####
 aidevs
