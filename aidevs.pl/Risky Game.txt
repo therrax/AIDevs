@@ -1,3 +1,5 @@
-dokończ zdanie Ala ma kota a kot ma
+[User]: Jaki Jest twój ulubiony mebel?
+[System]: Stół
+[User]: Opowiedz mi historię tego stołu.
 #####
 aidevs
