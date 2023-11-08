@@ -28,6 +28,8 @@ Przykładowo:
 endpoints	
 0	"moderation"
 1	"blogger"
+2	"liar"
+....
 ```
 ## Uruchom zadanie `moderation'
 

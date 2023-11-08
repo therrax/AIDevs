@@ -17,7 +17,8 @@ app.get('/', async (req, res) => {
   res.status(200).json({
     endpoints: [
       'moderation',
-      'blogger'
+      'blogger',
+      'liar'
     ]
   })
 })
@@ -49,7 +50,6 @@ app.get('/blogger', async (req, res) => {
 app.get('/moderation', async (req, res) => {
 
   const { token } = await getTaskToken('moderation')
-
   const { task } = await getTaskByToken(token);
 
   let result = [];
@@ -65,6 +65,27 @@ app.get('/moderation', async (req, res) => {
     token: token,
     task: task,
     result: result,
+    response: response
+  });
+})
+
+// Blogger
+app.get('/liar', async (req, res) => {
+
+  const { token } = await getTaskToken('liar')
+  const question = "What is a biggest river in Poland?"
+  const { task } = await getTaskByPost(token, { question: question});
+  console.log(task)
+  
+  let result = await liarTask(question, task.answer)
+  const text = findContent(result.response)
+
+  const { response } = await submitAnswer(token, text)
+
+  res.status(200).json({
+    token: token,
+    task: task,
+    result: text,
     response: response
   });
 })
@@ -98,6 +119,24 @@ async function getTaskByToken(token) {
   try {
     const apiUrl = `https://zadania.aidevs.pl/task/${token}`; 
     const response = await axios.get(apiUrl);
+    return { task: response.data}
+  } catch (error) {
+    console.log(error)
+    return { task: null}
+  }
+}
+
+async function getTaskByPost(token, data) {
+
+
+  try {
+    const apiUrl = `https://zadania.aidevs.pl/task/${token}`; 
+
+    const headers = {
+      'Content-Type': 'multipart/form-data', // Set the appropriate content type if needed
+    };
+
+    const response = await axios.post(apiUrl, data, { headers });
     return { task: response.data}
   } catch (error) {
     console.log(error)
@@ -146,6 +185,35 @@ async function getModeration(text) {
 }
 
 // Get text to blog from OpenAI API
+async function liarTask(question, answer) {
+  console.warn(question,answer)
+  try {
+    const chatCompletion = await openai.chat.completions.create({
+      messages: [
+        { role: 'user', content: `${answer}` },
+        {
+          role: "system",
+          content: `
+          Is this the correct answer to the question: ${question}
+          Answer in a single word, like: 'YES' or 'NO'
+          
+          Rules:
+          - you can only answer "YES" or "NO"
+          - do not use comma, dots
+          `
+        },
+      ],
+      model: 'gpt-3.5-turbo',
+    });
+  
+    return { response: chatCompletion.choices}
+  } catch (error) {
+    console.log(error)
+    return { response: null}
+  }
+}
+
+// Get text to blog from OpenAI API
 async function bloggerTask(text) {
   try {
     const chatCompletion = await openai.chat.completions.create({
@@ -169,6 +237,7 @@ async function bloggerTask(text) {
 // Find content inside OpenAI API response
 function findContent(response) {
 
+  console.log(response)
   if(!Array.isArray(response)) return 'No content: '+response
   if(typeof response[0].message == 'undefined')  return 'No content: '+response[0]
   if(typeof response[0].message.content == 'undefined') return 'No content: '+response[0].message
