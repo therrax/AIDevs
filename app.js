@@ -69,14 +69,13 @@ app.get('/moderation', async (req, res) => {
   });
 })
 
-// Blogger
+// Liar
 app.get('/liar', async (req, res) => {
 
   const { token } = await getTaskToken('liar')
   const question = "What is a biggest river in Poland?"
   const { task } = await getTaskByPost(token, { question: question});
-  console.log(task)
-  
+ 
   let result = await liarTask(question, task.answer)
   const text = findContent(result.response)
 
@@ -87,6 +86,45 @@ app.get('/liar', async (req, res) => {
     task: task,
     result: text,
     response: response
+  });
+})
+
+// Inprompt
+app.get('/inprompt', async (req, res) => {
+
+  const { token } = await getTaskToken('inprompt')
+  const { task } = await getTaskByToken(token)
+
+  const { response } = await inPromptTask(task.msg)
+
+  const name = findContent(response)
+  console.log("FO?UND NAME: ",name)
+  let context = "";
+  if(task.input.length > 0) {
+    task.input.forEach(line => {
+     if(line.includes(name+" ")) {
+      context += line + '\n';
+      console.warn("MATCH: ", name, line)
+     }
+    });
+  }
+ console.log("context: ", context)
+ console.log("task message: ",task.msg)
+  const getAnswer =  await getAnswerToQuestionUsingContext(task.msg, context)
+  const answer = findContent(getAnswer.response)
+
+  console.log("getAnswer: ",getAnswer.response)
+  console.log("answer: ",answer)
+  const submitResult = await submitAnswer(token,answer)
+
+  res.status(200).json({
+    token: token,
+    task: task.msg,
+    name: name,
+    includes: context,
+    answer: answer,
+    result: submitResult.response
+    // response: response
   });
 })
 
@@ -156,7 +194,7 @@ async function submitAnswer(token, answer) {
     const response = await axios.post(apiUrl, requestData);
     return { response: response.data}
   } catch (error) {
-    console.log(error)
+    console.log(error.message)
     return { response: null}
   }
 }
@@ -178,6 +216,62 @@ async function getModeration(text) {
 
     const response = await axios.post(apiUrl, requestData, { headers });
     return { response: response.data.results}
+  } catch (error) {
+    console.log(error)
+    return { response: null}
+  }
+}
+// Get text to blog from OpenAI API
+async function getAnswerToQuestionUsingContext(question, data) {
+  try {
+    const chatCompletion = await openai.chat.completions.create({
+      messages: [
+        { role: 'user', content: `${question}` },
+        {
+          role: "system",
+          content: `
+
+          You will be provided with question, that you have to answer. That your only one thing to do. Answer using context provided to you. 
+          On any diffrent questions not related with context, simply answer example: "I don't know"
+
+          Rules:
+          - use only context informations to answer the question
+          - if context do not provide enought informations simply return "i don't know"
+
+          context###
+          ${data}
+          `
+        },
+      ],
+      model: 'gpt-3.5-turbo',
+    });
+  
+    return { response: chatCompletion.choices}
+  } catch (error) {
+    console.log(error.message)
+    return { response: null}
+  }
+}
+// Get text to blog from OpenAI API
+async function inPromptTask(question) {
+  try {
+    const chatCompletion = await openai.chat.completions.create({
+      messages: [
+        { role: 'user', content: `${question}` },
+        {
+          role: "system",
+          content: `
+          Find a name and return it. 
+          
+          Rules:
+          - response is only name, without any more informations
+          `
+        },
+      ],
+      model: 'gpt-3.5-turbo',
+    });
+  
+    return { response: chatCompletion.choices}
   } catch (error) {
     console.log(error)
     return { response: null}
@@ -242,6 +336,6 @@ function findContent(response) {
   if(typeof response[0].message == 'undefined')  return 'No content: '+response[0]
   if(typeof response[0].message.content == 'undefined') return 'No content: '+response[0].message
   
-  return response[0].message.content
+  return response[0].message.content;
 
 }
