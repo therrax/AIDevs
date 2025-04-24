@@ -5,7 +5,7 @@ Express.js API wykonujące zadania AI Devs API
 
 ## Instalacja
 
-Uruchom `npm i --save` aby pobrać paczku node_modules do folderu `node_modules/`.
+Uruchom `npm i --save`, aby pobrać paczki node_modules do folderu `node_modules/`.
 
 ## Konfiguracja
 Dodaj plik `.env`
